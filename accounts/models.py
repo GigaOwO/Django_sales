@@ -33,10 +33,21 @@ class UserManager(BaseUserManager):
         )
 
 class User(AbstractBaseUser, PermissionsMixin):
+    ACCOUNT_TYPES = (
+        ('root', 'Root'),
+        ('employee', 'Employee'),
+    )
+    
     account_id = models.CharField(
         verbose_name=_("account_id"),
         unique=True,
         max_length=10
+    )
+    account_type = models.CharField(
+        verbose_name=_("account_type"),
+        max_length=10,
+        choices=ACCOUNT_TYPES,
+        default='employee'
     )
     email = models.EmailField(
         verbose_name=_("email"),
@@ -61,6 +72,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_superuser = models.BooleanField(
         verbose_name=_("is_superuser"),
         default=False
+    )
+    department = models.CharField(
+        verbose_name=_("department"),
+        max_length=20,
+        null=True,
+        blank=True
     )
     created_at = models.DateTimeField(
         verbose_name=_("created_at"),

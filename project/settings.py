@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'accounts',
+    'widget_tweaks',
+    'sales',
 ]
 
 AUTH_USER_MODEL = "accounts.User"
@@ -124,3 +126,8 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+LOGIN_URL = 'accounts:login'  # ログインページのURL
+LOGIN_REDIRECT_URL = 'accounts:index'  # ログイン後のリダイレクト先
+LOGOUT_REDIRECT_URL = 'accounts:index'  # ログアウト後のリダイレクト先

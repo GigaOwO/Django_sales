@@ -2,7 +2,7 @@
 {% load widget_tweaks %}
 
 {% block title %}
-<div class="h1">Create Root Account</div>
+<div class="h1">Create Employee Account</div>
 {% endblock %}
 
 {% block content %}
@@ -31,6 +31,12 @@
         </div>
 
         <div class="mb-4">
+            <label for="department" class="block text-gray-700">Department:</label>
+            {{ form.department.errors }}
+            {{ form.department|add_class:"w-full border rounded px-3 py-2" }}
+        </div>
+
+        <div class="mb-4">
             <label for="password1" class="block text-gray-700">Password:</label>
             {{ form.password1.errors }}
             {{ form.password1|add_class:"w-full border rounded px-3 py-2" }}
@@ -43,8 +49,8 @@
         </div>
 
         <div class="mt-6">
-            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Create Root Account</button>
-            <a href="{% url 'accounts:index' %}" class="ml-2 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Back</a>
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Create Employee Account</button>
+            <a href="{% url 'accounts:employee_list' %}" class="ml-2 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Back</a>
         </div>
     </form>
 </div>

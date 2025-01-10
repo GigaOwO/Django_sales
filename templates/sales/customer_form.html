@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}
+<div class="h1">得意先{{ action }}</div>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">得意先コード</label>
+                {{ form.customer_code|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" }}
+                {{ form.customer_code.errors }}
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">得意先名</label>
+                {{ form.customer_name|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" }}
+                {{ form.customer_name.errors }}
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">電話番号</label>
+                {{ form.phone_number|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" }}
+                {{ form.phone_number.errors }}
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">郵便番号</label>
+                {{ form.postal_code|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" }}
+                {{ form.postal_code.errors }}
+            </div>
+
+            <div class="col-span-2">
+                <label class="block text-sm font-medium text-gray-700">住所</label>
+                {{ form.address|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" }}
+                {{ form.address.errors }}
+            </div>
+
+            <div class="col-span-2">
+                <label class="block text-sm font-medium text-gray-700">メールアドレス</label>
+                {{ form.email|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" }}
+                {{ form.email.errors }}
+            </div>
+        </div>
+
+        <div class="flex justify-end space-x-2">
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                {{ action }}
+            </button>
+            <a href="{% url 'sales:customer_list' %}" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                戻る
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

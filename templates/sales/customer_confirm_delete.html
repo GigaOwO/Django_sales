@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}
+<div class="h1">得意先削除確認</div>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white shadow rounded-lg p-6">
+        <p class="text-lg mb-4">以下の得意先を削除してもよろしいですか？</p>
+        
+        <div class="mb-6">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="font-medium">得意先コード:</div>
+                <div>{{ object.customer_code }}</div>
+                
+                <div class="font-medium">得意先名:</div>
+                <div>{{ object.customer_name }}</div>
+                
+                <div class="font-medium">電話番号:</div>
+                <div>{{ object.phone_number }}</div>
+                
+                <div class="font-medium">住所:</div>
+                <div>〒{{ object.postal_code }} {{ object.address }}</div>
+            </div>
+        </div>
+
+        <form method="post" class="flex justify-end space-x-2">
+            {% csrf_token %}
+            <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                削除
+            </button>
+            <a href="{% url 'sales:customer_list' %}" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                キャンセル
+            </a>
+        </form>
+    </div>
+</div>
+{% endblock %}

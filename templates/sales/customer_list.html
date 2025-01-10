@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}
+<div class="h1">得意先一覧</div>
+{% endblock %}
+
+{% block content %}
+{% if user.department == '営業部' %}
+<div class="mb-4">
+    <a href="{% url 'sales:customer_create' %}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">新規登録</a>
+</div>
+{% endif %}
+
+<div class="overflow-x-auto">
+    <table class="min-w-full bg-white">
+        <thead class="bg-gray-100">
+            <tr>
+                <th class="px-6 py-3 border-b text-left">得意先コード</th>
+                <th class="px-6 py-3 border-b text-left">得意先名</th>
+                <th class="px-6 py-3 border-b text-left">電話番号</th>
+                <th class="px-6 py-3 border-b text-left">住所</th>
+                {% if user.department == '営業部' %}
+                <th class="px-6 py-3 border-b text-left">操作</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+            {% for customer in customers %}
+            <tr>
+                <td class="px-6 py-4">{{ customer.customer_code }}</td>
+                <td class="px-6 py-4">{{ customer.customer_name }}</td>
+                <td class="px-6 py-4">{{ customer.phone_number }}</td>
+                <td class="px-6 py-4">〒{{ customer.postal_code }} {{ customer.address }}</td>
+                {% if user.department == '営業部' %}
+                <td class="px-6 py-4">
+                    <a href="{% url 'sales:customer_edit' customer.id %}" class="text-blue-600 hover:text-blue-900">編集</a>
+                    <a href="{% url 'sales:customer_delete' customer.id %}" class="text-red-600 hover:text-red-900 ml-2">削除</a>
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
