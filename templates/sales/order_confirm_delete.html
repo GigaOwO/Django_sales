@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}
+<div class="h1">受注削除確認</div>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white shadow rounded-lg p-6">
+        <div class="mb-6">
+            <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <!-- 警告アイコン -->
+                        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-red-700">
+                            以下の受注情報を削除してもよろしいですか？
+                            この操作は取り消せません。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 受注情報の表示 -->
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="font-medium text-gray-700">受注コード:</div>
+                <div>{{ object.order_code }}</div>
+
+                <div class="font-medium text-gray-700">得意先:</div>
+                <div>{{ object.customer.customer_name }}</div>
+
+                <div class="font-medium text-gray-700">製品:</div>
+                <div>{{ object.product.product_name }}</div>
+
+                <div class="font-medium text-gray-700">数量:</div>
+                <div>{{ object.quantity }}</div>
+
+                <div class="font-medium text-gray-700">受注日:</div>
+                <div>{{ object.order_date|date:"Y/m/d" }}</div>
+
+                <div class="font-medium text-gray-700">納品予定日:</div>
+                <div>{{ object.delivery_date|date:"Y/m/d" }}</div>
+
+                <div class="font-medium text-gray-700">合計金額:</div>
+                <div>¥{{ object.total_amount|stringformat:",.0f" }}</div>
+            </div>
+
+            <!-- 削除フォーム -->
+            <form method="post" class="flex justify-end space-x-2">
+                {% csrf_token %}
+                <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                    削除
+                </button>
+                <a href="{% url 'sales:order_list' %}" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                    キャンセル
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

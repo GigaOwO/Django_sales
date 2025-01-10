@@ -2,22 +2,60 @@
 
 {% block title %}
 {% if user.is_authenticated %}
-<div class="text-xl">Mypage</div>
+<div class="text-xl">マイページ</div>
 {% else %}
-<div class="text-xl">Main</div>
+<div class="text-xl">メインメニュー</div>
 {% endif %}
 {% endblock %}
 
 {% block content %}
 {% if user.is_authenticated %}
-<div class="h2">Welcome {{ user.first_name }} {{ user.last_name }}</div>
-<div class="mt-4">
-    <a href="{% url 'accounts:logout' %}" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Logout</a>
-</div>
+    <div class="mb-6">
+        <h2 class="text-xl mb-2">ようこそ {{ user.first_name }} {{ user.last_name }} さん</h2>
+        <p class="text-gray-600">部署: {{ user.department|default:"ルートアカウント" }}</p>
+    </div>
+
+    <div class="space-y-6">
+        <!-- メニューセクション -->
+        {% if user.account_type == 'root' or user.department == '営業部' %}
+        <div class="border-b pb-4">
+            <h3 class="text-lg font-semibold mb-3">販売管理</h3>
+            <div class="space-x-2">
+                <a href="{% url 'sales:customer_list' %}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">得意先一覧</a>
+                <a href="{% url 'sales:order_list' %}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">受注一覧</a>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if user.account_type == 'root' or user.department == '製品管理部' %}
+        <div class="border-b pb-4">
+            <h3 class="text-lg font-semibold mb-3">製品管理</h3>
+            <div class="space-x-2">
+                <a href="{% url 'sales:product_list' %}" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">製品一覧</a>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if user.account_type == 'root' or user.department == '人事部' %}
+        <div class="border-b pb-4">
+            <h3 class="text-lg font-semibold mb-3">従業員管理</h3>
+            <div class="space-x-2">
+                <a href="{% url 'accounts:employee_list' %}" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">従業員一覧</a>
+                <a href="{% url 'accounts:create_employee' %}" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">従業員登録</a>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ログアウトボタン -->
+        <div class="pt-4">
+            <a href="{% url 'accounts:logout' %}" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">ログアウト</a>
+        </div>
+    </div>
+
 {% else %}
-<div class="space-x-4">
-    <a href="{% url 'accounts:signup' %}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Signup</a>
-    <a href="{% url 'accounts:login' %}" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Login</a>
-</div>
+    <div class="space-x-4">
+        <a href="{% url 'accounts:signup' %}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">ルートアカウント登録</a>
+        <a href="{% url 'accounts:login' %}" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">ログイン</a>
+    </div>
 {% endif %}
 {% endblock %}

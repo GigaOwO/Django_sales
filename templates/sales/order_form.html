@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}
+<div class="h1">受注{{ action }}</div>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">受注コード</label>
+                {{ form.order_code|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" }}
+                {{ form.order_code.errors }}
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">得意先</label>
+                {{ form.customer|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" }}
+                {{ form.customer.errors }}
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">製品</label>
+                {{ form.product|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" }}
+                {{ form.product.errors }}
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">数量</label>
+                {{ form.quantity|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" }}
+                {{ form.quantity.errors }}
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">受注日</label>
+                {{ form.order_date|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" }}
+                {{ form.order_date.errors }}
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">納品予定日</label>
+                {{ form.delivery_date|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" }}
+                {{ form.delivery_date.errors }}
+            </div>
+
+            {% if action == '編集' %}
+            <div>
+                <label class="block text-sm font-medium text-gray-700">納品日</label>
+                {{ form.delivered_date|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" }}
+                {{ form.delivered_date.errors }}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="flex justify-end space-x-2">
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                {{ action }}
+            </button>
+            <a href="{% url 'sales:order_list' %}" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                戻る
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

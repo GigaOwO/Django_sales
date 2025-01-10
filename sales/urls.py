@@ -13,4 +13,10 @@ urlpatterns = [
     path('products/create/', views.ProductCreateView.as_view(), name='product_create'),
     path('products/<int:pk>/edit/', views.ProductUpdateView.as_view(), name='product_edit'),
     path('products/<int:pk>/delete/', views.ProductDeleteView.as_view(), name='product_delete'),
+
+    path('orders/', views.OrderListView.as_view(), name='order_list'),
+    path('orders/create/', views.OrderCreateView.as_view(), name='order_create'),
+    path('orders/<int:pk>/', views.OrderDetailView.as_view(), name='order_detail'),
+    path('orders/<int:pk>/edit/', views.OrderUpdateView.as_view(), name='order_edit'),
+    path('orders/<int:pk>/delete/', views.OrderDeleteView.as_view(), name='order_delete'),
 ]

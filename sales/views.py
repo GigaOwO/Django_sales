@@ -1,6 +1,7 @@
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
+from django.shortcuts import redirect
 from .models import Customer, Product, Order
 
 class CustomerListView(LoginRequiredMixin, ListView):
@@ -104,3 +105,62 @@ class ProductDeleteView(LoginRequiredMixin, DeleteView):
 
     def test_func(self):
         return self.request.user.department == '製品管理部'
+
+
+class OrderAccessMixin(UserPassesTestMixin):
+    """営業部のみ編集可能、他部署は参照のみ可能にするMixin"""
+    def test_func(self):
+        return self.request.user.department == '営業部'
+
+    def handle_no_permission(self):
+        return redirect('sales:order_list')
+
+class OrderListView(LoginRequiredMixin, ListView):
+    """受注一覧"""
+    model = Order
+    template_name = 'sales/order_list.html'
+    context_object_name = 'orders'
+    ordering = ['-order_date']
+
+class OrderDetailView(LoginRequiredMixin, DetailView):
+    """受注詳細"""
+    model = Order
+    template_name = 'sales/order_detail.html'
+    context_object_name = 'order'
+
+class OrderCreateView(LoginRequiredMixin, OrderAccessMixin, CreateView):
+    """受注登録"""
+    model = Order
+    template_name = 'sales/order_form.html'
+    fields = ['order_code', 'customer', 'product', 'quantity', 'order_date', 'delivery_date']
+    success_url = reverse_lazy('sales:order_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['action'] = '登録'
+        return context
+
+class OrderUpdateView(LoginRequiredMixin, OrderAccessMixin, UpdateView):
+    """受注編集"""
+    model = Order
+    template_name = 'sales/order_form.html'
+    fields = ['order_code', 'customer', 'product', 'quantity', 'order_date', 'delivery_date', 'delivered_date']
+    success_url = reverse_lazy('sales:order_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['action'] = '編集'
+        return context
+
+class OrderDeleteView(LoginRequiredMixin, OrderAccessMixin, DeleteView):
+    """受注削除"""
+    model = Order
+    template_name = 'sales/order_confirm_delete.html'
+    success_url = reverse_lazy('sales:order_list')
+
+    def delete(self, request, *args, **kwargs):
+        """削除成功時にメッセージを表示"""
+        result = super().delete(request, *args, **kwargs)
+        from django.contrib import messages
+        messages.success(request, '受注情報を削除しました。')
+        return result

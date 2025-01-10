@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}
+<div class="h1">受注一覧</div>
+{% endblock %}
+
+{% block content %}
+{% if user.department == '営業部' %}
+<div class="mb-4">
+    <a href="{% url 'sales:order_create' %}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">新規受注登録</a>
+</div>
+{% endif %}
+
+<div class="overflow-x-auto">
+    <table class="min-w-full bg-white">
+        <thead class="bg-gray-100">
+            <tr>
+                <th class="px-6 py-3 border-b text-left">受注コード</th>
+                <th class="px-6 py-3 border-b text-left">得意先名</th>
+                <th class="px-6 py-3 border-b text-left">製品名</th>
+                <th class="px-6 py-3 border-b text-right">数量</th>
+                <th class="px-6 py-3 border-b text-left">受注日</th>
+                <th class="px-6 py-3 border-b text-left">納品予定日</th>
+                <th class="px-6 py-3 border-b text-left">納品日</th>
+                {% if user.department == '営業部' %}
+                <th class="px-6 py-3 border-b text-left">操作</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+            {% for order in orders %}
+            <tr>
+                <td class="px-6 py-4">
+                    <a href="{% url 'sales:order_detail' order.id %}" class="text-blue-600 hover:text-blue-900">
+                        {{ order.order_code }}
+                    </a>
+                </td>
+                <td class="px-6 py-4">{{ order.customer.customer_name }}</td>
+                <td class="px-6 py-4">{{ order.product.product_name }}</td>
+                <td class="px-6 py-4 text-right">{{ order.quantity }}</td>
+                <td class="px-6 py-4">{{ order.order_date|date:"Y/m/d" }}</td>
+                <td class="px-6 py-4">{{ order.delivery_date|date:"Y/m/d" }}</td>
+                <td class="px-6 py-4">{{ order.delivered_date|date:"Y/m/d"|default:"-" }}</td>
+                {% if user.department == '営業部' %}
+                <td class="px-6 py-4">
+                    <a href="{% url 'sales:order_edit' order.id %}" class="text-blue-600 hover:text-blue-900">編集</a>
+                    <a href="{% url 'sales:order_delete' order.id %}" class="text-red-600 hover:text-red-900 ml-2">削除</a>
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
