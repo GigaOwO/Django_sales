@@ -23,4 +23,6 @@ urlpatterns = [
     path('inventory/<int:pk>/update/', views.InventoryUpdateView.as_view(), name='inventory_update'),
     path('inventory/<int:inventory_id>/transactions/', views.InventoryTransactionListView.as_view(), name='inventory_transaction_list'),
     path('inventory/<int:inventory_id>/transactions/create/', views.InventoryTransactionCreateView.as_view(), name='inventory_transaction_create'),
+
+    path('summary/', views.OrderSummaryView.as_view(), name='order_summary'),
 ]

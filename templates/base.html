@@ -28,6 +28,9 @@
                         <a href="{% url 'sales:order_list' %}" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
                             受注管理
                         </a>
+                        <a href="{% url 'sales:order_summary' %}" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                            受注集計
+                        </a>
                         {% endif %}
 
                         {% if user.account_type == 'root' or user.department == '製品管理部' %}

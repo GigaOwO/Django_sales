@@ -1,7 +1,10 @@
 from django.db import models
 from django.utils import timezone
 from django.core.exceptions import ValidationError
-from django.db.models import Sum
+from django.db.models import Sum, Count, F, ExpressionWrapper, DecimalField
+from django.db.models.functions import TruncMonth, TruncYear
+from datetime import datetime, date
+from dateutil.relativedelta import relativedelta
 
 class Customer(models.Model):
     """得意先モデル"""
@@ -64,7 +67,7 @@ class Order(models.Model):
     order_date = models.DateField("受注日", default=timezone.now)
     delivery_date = models.DateField("納品予定日")
     delivered_date = models.DateField("納品日", null=True, blank=True)
-    
+
     class Meta:
         verbose_name = "受注"
         verbose_name_plural = "受注一覧"
@@ -76,6 +79,122 @@ class Order(models.Model):
     def total_amount(self):
         """合計金額を計算"""
         return self.quantity * self.product.unit_price
+
+    @classmethod
+    def get_monthly_customer_summary(cls, year, month):
+        """指定年月の得意先別受注集計を取得"""
+        target_date = date(year, month, 1)
+        next_month = target_date + relativedelta(months=1)
+        
+        amount_expression = ExpressionWrapper(
+            F('quantity') * F('product__unit_price'),
+            output_field=DecimalField()
+        )
+        
+        return cls.objects.filter(
+            order_date__gte=target_date,
+            order_date__lt=next_month
+        ).values(
+            'customer__customer_code',
+            'customer__customer_name'
+        ).annotate(
+            total_quantity=Sum('quantity'),
+            total_amount=Sum(amount_expression),
+            order_count=Count('id')
+        ).order_by('-total_amount')
+
+    @classmethod
+    def get_yearly_customer_summary(cls, year):
+        """指定年の得意先別受注集計を取得"""
+        target_date = date(year, 1, 1)
+        next_year = date(year + 1, 1, 1)
+        
+        amount_expression = ExpressionWrapper(
+            F('quantity') * F('product__unit_price'),
+            output_field=DecimalField()
+        )
+        
+        return cls.objects.filter(
+            order_date__gte=target_date,
+            order_date__lt=next_year
+        ).values(
+            'customer__customer_code',
+            'customer__customer_name'
+        ).annotate(
+            total_quantity=Sum('quantity'),
+            total_amount=Sum(amount_expression),
+            order_count=Count('id')
+        ).order_by('-total_amount')
+
+    @classmethod
+    def get_monthly_product_summary(cls, year, month):
+        """指定年月の製品別受注集計を取得"""
+        target_date = date(year, month, 1)
+        next_month = target_date + relativedelta(months=1)
+        
+        amount_expression = ExpressionWrapper(
+            F('quantity') * F('product__unit_price'),
+            output_field=DecimalField()
+        )
+        
+        return cls.objects.filter(
+            order_date__gte=target_date,
+            order_date__lt=next_month
+        ).values(
+            'product__product_code',
+            'product__product_name',
+            'product__unit_price'
+        ).annotate(
+            total_quantity=Sum('quantity'),
+            total_amount=Sum(amount_expression),
+            order_count=Count('id')
+        ).order_by('-total_amount')
+
+    @classmethod
+    def get_yearly_product_summary(cls, year):
+        """指定年の製品別受注集計を取得"""
+        target_date = date(year, 1, 1)
+        next_year = date(year + 1, 1, 1)
+        
+        amount_expression = ExpressionWrapper(
+            F('quantity') * F('product__unit_price'),
+            output_field=DecimalField()
+        )
+        
+        return cls.objects.filter(
+            order_date__gte=target_date,
+            order_date__lt=next_year
+        ).values(
+            'product__product_code',
+            'product__product_name',
+            'product__unit_price'
+        ).annotate(
+            total_quantity=Sum('quantity'),
+            total_amount=Sum(amount_expression),
+            order_count=Count('id')
+        ).order_by('-total_amount')
+
+    @classmethod
+    def get_monthly_trend(cls, year):
+        """指定年の月別集計トレンドを取得"""
+        target_date = date(year, 1, 1)
+        next_year = date(year + 1, 1, 1)
+        
+        amount_expression = ExpressionWrapper(
+            F('quantity') * F('product__unit_price'),
+            output_field=DecimalField()
+        )
+        
+        return cls.objects.filter(
+            order_date__gte=target_date,
+            order_date__lt=next_year
+        ).annotate(
+            month=TruncMonth('order_date')
+        ).values('month').annotate(
+            total_quantity=Sum('quantity'),
+            total_amount=Sum(amount_expression),
+            order_count=Count('id')
+        ).order_by('month')
 
 class Inventory(models.Model):
     """在庫モデル"""

@@ -1,10 +1,12 @@
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
+from django.views.generic import (
+    ListView, CreateView, UpdateView, DeleteView, DetailView, TemplateView
+)
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
 from django.shortcuts import redirect, get_object_or_404
 from django.contrib import messages
 from .models import Customer, Product, Order, Inventory, InventoryTransaction
-
+from datetime import datetime, date
 
 class CustomerListView(LoginRequiredMixin, ListView):
     """得意先一覧"""
@@ -248,3 +250,35 @@ class InventoryTransactionCreateView(LoginRequiredMixin, UserPassesTestMixin, Cr
 
     def get_success_url(self):
         return reverse_lazy('sales:inventory_transaction_list', kwargs={'inventory_id': self.object.inventory.id})
+
+
+
+class OrderSummaryView(LoginRequiredMixin, TemplateView):
+    template_name = 'sales/order_summary.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # 年月の取得（デフォルトは現在の年月）
+        year = int(self.request.GET.get('year', datetime.now().year))
+        month = int(self.request.GET.get('month', datetime.now().month))
+        
+        # 利用可能な年のリストを生成（例：過去3年分）
+        current_year = datetime.now().year
+        context['available_years'] = list(range(current_year - 2, current_year + 1))
+        
+        # 月のリストを生成
+        context['months'] = [(i, f"{i}月") for i in range(1, 13)]
+        
+        # 各種集計データの取得
+        context.update({
+            'selected_year': year,
+            'selected_month': month,
+            'monthly_customer_summary': Order.get_monthly_customer_summary(year, month),
+            'yearly_customer_summary': Order.get_yearly_customer_summary(year),
+            'monthly_product_summary': Order.get_monthly_product_summary(year, month),
+            'yearly_product_summary': Order.get_yearly_product_summary(year),
+            'monthly_trend': Order.get_monthly_trend(year),
+        })
+        
+        return context
