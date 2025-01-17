@@ -19,4 +19,8 @@ urlpatterns = [
     path('orders/<int:pk>/', views.OrderDetailView.as_view(), name='order_detail'),
     path('orders/<int:pk>/edit/', views.OrderUpdateView.as_view(), name='order_edit'),
     path('orders/<int:pk>/delete/', views.OrderDeleteView.as_view(), name='order_delete'),
+
+    path('inventory/<int:pk>/update/', views.InventoryUpdateView.as_view(), name='inventory_update'),
+    path('inventory/<int:inventory_id>/transactions/', views.InventoryTransactionListView.as_view(), name='inventory_transaction_list'),
+    path('inventory/<int:inventory_id>/transactions/create/', views.InventoryTransactionCreateView.as_view(), name='inventory_transaction_create'),
 ]

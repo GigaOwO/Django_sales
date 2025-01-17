@@ -1,8 +1,10 @@
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
-from django.shortcuts import redirect
-from .models import Customer, Product, Order
+from django.shortcuts import redirect, get_object_or_404
+from django.contrib import messages
+from .models import Customer, Product, Order, Inventory, InventoryTransaction
+
 
 class CustomerListView(LoginRequiredMixin, ListView):
     """得意先一覧"""
@@ -164,3 +166,85 @@ class OrderDeleteView(LoginRequiredMixin, OrderAccessMixin, DeleteView):
         from django.contrib import messages
         messages.success(request, '受注情報を削除しました。')
         return result
+
+
+class InventoryUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    """在庫数更新ビュー"""
+    model = Inventory
+    template_name = 'sales/inventory_form.html'
+    fields = ['quantity', 'safety_stock']
+    success_url = reverse_lazy('sales:product_list')
+
+    def test_func(self):
+        """製品管理部のみアクセス可能"""
+        return self.request.user.department == '製品管理部'
+
+    def form_valid(self, form):
+        """在庫数更新時に取引履歴を記録"""
+        old_quantity = self.get_object().quantity
+        new_quantity = form.cleaned_data['quantity']
+        adjustment = new_quantity - old_quantity
+
+        response = super().form_valid(form)
+
+        if adjustment != 0:
+            InventoryTransaction.objects.create(
+                inventory=self.object,
+                transaction_type='adjust',
+                quantity=adjustment,
+                note='手動在庫調整'
+            )
+            messages.success(self.request, f'在庫数を{new_quantity}に更新しました。')
+
+        return response
+
+class InventoryTransactionListView(LoginRequiredMixin, ListView):
+    """在庫取引履歴一覧"""
+    model = InventoryTransaction
+    template_name = 'sales/inventory_transaction_list.html'
+    context_object_name = 'transactions'
+    ordering = ['-date']
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        inventory_id = self.kwargs.get('inventory_id')
+        if inventory_id:
+            queryset = queryset.filter(inventory_id=inventory_id)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        inventory_id = self.kwargs.get('inventory_id')
+        if inventory_id:
+            context['inventory'] = get_object_or_404(Inventory, id=inventory_id)
+        return context
+
+class InventoryTransactionCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+    """在庫取引登録ビュー"""
+    model = InventoryTransaction
+    template_name = 'sales/inventory_transaction_form.html'
+    fields = ['transaction_type', 'quantity', 'note']
+    
+    def test_func(self):
+        return self.request.user.department == '製品管理部'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        inventory_id = self.kwargs.get('inventory_id')
+        context['inventory'] = get_object_or_404(Inventory, id=inventory_id)
+        return context
+
+    def form_valid(self, form):
+        inventory_id = self.kwargs.get('inventory_id')
+        form.instance.inventory = get_object_or_404(Inventory, id=inventory_id)
+        
+        try:
+            response = super().form_valid(form)
+            messages.success(self.request, '在庫取引を登録しました。')
+            return response
+        except ValidationError as e:
+            form.add_error(None, e.message)
+            return self.form_invalid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('sales:inventory_transaction_list', kwargs={'inventory_id': self.object.inventory.id})

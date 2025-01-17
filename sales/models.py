@@ -1,5 +1,7 @@
 from django.db import models
 from django.utils import timezone
+from django.core.exceptions import ValidationError
+from django.db.models import Sum
 
 class Customer(models.Model):
     """得意先モデル"""
@@ -30,6 +32,29 @@ class Product(models.Model):
     def __str__(self):
         return f"{self.product_code}: {self.product_name}"
 
+    def get_current_stock(self):
+        """現在の在庫数を取得"""
+        try:
+            return self.inventory.quantity
+        except Inventory.DoesNotExist:
+            return 0
+
+    def is_low_stock(self):
+        """在庫が安全在庫数を下回っているかチェック"""
+        try:
+            return self.inventory.quantity < self.inventory.safety_stock
+        except Inventory.DoesNotExist:
+            return True
+
+    def create_inventory(self, initial_quantity=0, safety_stock=100):
+        """在庫情報を新規作成"""
+        if not hasattr(self, 'inventory'):
+            Inventory.objects.create(
+                product=self,
+                quantity=initial_quantity,
+                safety_stock=safety_stock
+            )
+
 class Order(models.Model):
     """受注モデル"""
     order_code = models.CharField("受注コード", max_length=10, unique=True)
@@ -51,3 +76,76 @@ class Order(models.Model):
     def total_amount(self):
         """合計金額を計算"""
         return self.quantity * self.product.unit_price
+
+class Inventory(models.Model):
+    """在庫モデル"""
+    product = models.OneToOneField(
+        Product, 
+        on_delete=models.PROTECT,
+        verbose_name="製品",
+        related_name="inventory"
+    )
+    quantity = models.IntegerField("在庫数", default=0)
+    safety_stock = models.IntegerField("安全在庫数", default=100)
+    last_updated = models.DateTimeField("最終更新日", auto_now=True)
+
+    class Meta:
+        verbose_name = "在庫"
+        verbose_name_plural = "在庫一覧"
+
+    def __str__(self):
+        return f"{self.product.product_name}の在庫"
+
+
+class InventoryTransaction(models.Model):
+    """在庫取引履歴モデル"""
+    TRANSACTION_TYPES = [
+        ('in', '入庫'),
+        ('out', '出庫'),
+        ('adjust', '在庫調整'),
+    ]
+
+    inventory = models.ForeignKey(
+        Inventory,
+        on_delete=models.PROTECT,
+        verbose_name="在庫",
+        related_name="transactions"
+    )
+    transaction_type = models.CharField(
+        "取引種類",
+        max_length=10,
+        choices=TRANSACTION_TYPES
+    )
+    quantity = models.IntegerField("数量")
+    date = models.DateTimeField("取引日時", auto_now_add=True)
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.PROTECT,
+        verbose_name="関連受注",
+        null=True,
+        blank=True
+    )
+    note = models.CharField("備考", max_length=200, blank=True)
+
+    class Meta:
+        verbose_name = "在庫取引"
+        verbose_name_plural = "在庫取引履歴"
+
+    def clean(self):
+        # 出庫時の在庫チェック
+        if self.transaction_type == 'out':
+            current_stock = self.inventory.quantity
+            if current_stock < self.quantity:
+                raise ValidationError(f'在庫不足です。現在の在庫数: {current_stock}')
+
+    def save(self, *args, **kwargs):
+        # 在庫数の更新
+        if self.transaction_type == 'in':
+            self.inventory.quantity += self.quantity
+        elif self.transaction_type == 'out':
+            self.inventory.quantity -= self.quantity
+        elif self.transaction_type == 'adjust':
+            self.inventory.quantity += self.quantity  # 調整値（正負両方あり得る）
+
+        self.inventory.save()
+        super().save(*args, **kwargs)

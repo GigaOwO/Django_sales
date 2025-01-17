@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}
+<div class="h1">在庫更新 - {{ inventory.product.product_name }}</div>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white shadow-sm rounded-lg border p-6">
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700">製品名</label>
+                <div class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-gray-50 rounded-md">
+                    {{ inventory.product.product_name }}
+                </div>
+            </div>
+
+            <div>
+                <label for="{{ form.quantity.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                    在庫数
+                </label>
+                <div class="mt-1">
+                    {{ form.quantity|add_class:"block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md" }}
+                </div>
+                {{ form.quantity.errors }}
+            </div>
+
+            <div>
+                <label for="{{ form.safety_stock.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                    安全在庫数
+                </label>
+                <div class="mt-1">
+                    {{ form.safety_stock|add_class:"block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md" }}
+                </div>
+                {{ form.safety_stock.errors }}
+            </div>
+
+            <div class="flex justify-end space-x-3">
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    更新
+                </button>
+                <a href="{% url 'sales:product_list' %}" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                    戻る
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
