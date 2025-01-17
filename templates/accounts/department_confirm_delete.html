@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}
+<div class="h1">部署削除確認</div>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white shadow rounded-lg p-6">
+        <p class="text-lg mb-4">以下の部署を削除してもよろしいですか？</p>
+        
+        <div class="mb-6">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="font-medium">部署コード:</div>
+                <div>{{ object.code }}</div>
+                
+                <div class="font-medium">部署名:</div>
+                <div>{{ object.name }}</div>
+            </div>
+        </div>
+
+        <form method="post" class="flex justify-end space-x-2">
+            {% csrf_token %}
+            <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                削除
+            </button>
+            <a href="{% url 'accounts:department_list' %}" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                キャンセル
+            </a>
+        </form>
+    </div>
+</div>
+{% endblock %}

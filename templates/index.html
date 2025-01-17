@@ -2,60 +2,148 @@
 
 {% block title %}
 {% if user.is_authenticated %}
-<div class="text-xl">マイページ</div>
+<div class="flex justify-between items-center">
+    <h1 class="text-2xl font-bold">マイページ</h1>
+    <div class="text-sm text-gray-600">
+        最終ログイン: {{ user.last_login|date:"Y/m/d H:i" }}
+    </div>
+</div>
 {% else %}
-<div class="text-xl">メインメニュー</div>
+<div class="text-2xl font-bold">メインメニュー</div>
 {% endif %}
 {% endblock %}
 
 {% block content %}
 {% if user.is_authenticated %}
-    <div class="mb-6">
-        <h2 class="text-xl mb-2">ようこそ {{ user.first_name }} {{ user.last_name }} さん</h2>
-        <p class="text-gray-600">部署: {{ user.department|default:"ルートアカウント" }}</p>
+    <!-- ユーザー情報セクション -->
+    <div class="mb-8 bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-semibold mb-4">ユーザー情報</h2>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <p class="text-gray-600">アカウントID</p>
+                <p class="font-medium">{{ user.account_id }}</p>
+            </div>
+            <div>
+                <p class="text-gray-600">氏名</p>
+                <p class="font-medium">{{ user.last_name }} {{ user.first_name }}</p>
+            </div>
+            <div>
+                <p class="text-gray-600">メールアドレス</p>
+                <p class="font-medium">{{ user.email }}</p>
+            </div>
+            <div>
+                <p class="text-gray-600">所属部署</p>
+                <p class="font-medium">{{ user.department.name|default:"ルートアカウント" }}</p>
+            </div>
+        </div>
     </div>
 
+    <!-- 部署別メニューセクション -->
     <div class="space-y-6">
-        <!-- メニューセクション -->
-        {% if user.account_type == 'root' or user.department == '営業部' %}
-        <div class="border-b pb-4">
-            <h3 class="text-lg font-semibold mb-3">販売管理</h3>
-            <div class="space-x-2">
-                <a href="{% url 'sales:customer_list' %}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">得意先一覧</a>
-                <a href="{% url 'sales:order_list' %}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">受注一覧</a>
+        {% if user.account_type == 'root' %}
+        <!-- ルートアカウント用メニュー -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">システム管理</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <a href="{% url 'accounts:employee_list' %}" class="block p-4 bg-purple-50 rounded-lg hover:bg-purple-100">
+                    <h3 class="font-semibold text-purple-700">従業員管理</h3>
+                    <p class="text-sm text-purple-600 mt-1">従業員情報の管理と編集</p>
+                </a>
+                <a href="{% url 'accounts:department_list' %}" class="block p-4 bg-blue-50 rounded-lg hover:bg-blue-100">
+                    <h3 class="font-semibold text-blue-700">部署管理</h3>
+                    <p class="text-sm text-blue-600 mt-1">部署情報の管理と編集</p>
+                </a>
+                <a href="{% url 'sales:product_list' %}" class="block p-4 bg-green-50 rounded-lg hover:bg-green-100">
+                    <h3 class="font-semibold text-green-700">製品管理</h3>
+                    <p class="text-sm text-green-600 mt-1">製品情報と在庫の管理</p>
+                </a>
+                <a href="{% url 'sales:customer_list' %}" class="block p-4 bg-yellow-50 rounded-lg hover:bg-yellow-100">
+                    <h3 class="font-semibold text-yellow-700">得意先管理</h3>
+                    <p class="text-sm text-yellow-600 mt-1">得意先情報の管理</p>
+                </a>
+                <a href="{% url 'sales:order_list' %}" class="block p-4 bg-red-50 rounded-lg hover:bg-red-100">
+                    <h3 class="font-semibold text-red-700">受注管理</h3>
+                    <p class="text-sm text-red-600 mt-1">受注情報の管理</p>
+                </a>
+                <a href="{% url 'sales:order_summary' %}" class="block p-4 bg-indigo-50 rounded-lg hover:bg-indigo-100">
+                    <h3 class="font-semibold text-indigo-700">売上分析</h3>
+                    <p class="text-sm text-indigo-600 mt-1">売上データの分析と集計</p>
+                </a>
+            </div>
+        </div>
+
+        {% elif user.department.name == '営業部' %}
+        <!-- 営業部用メニュー -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">営業管理</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <a href="{% url 'sales:customer_list' %}" class="block p-4 bg-blue-50 rounded-lg hover:bg-blue-100">
+                    <h3 class="font-semibold text-blue-700">得意先管理</h3>
+                    <p class="text-sm text-blue-600 mt-1">得意先情報の管理と編集</p>
+                </a>
+                <a href="{% url 'sales:order_list' %}" class="block p-4 bg-green-50 rounded-lg hover:bg-green-100">
+                    <h3 class="font-semibold text-green-700">受注管理</h3>
+                    <p class="text-sm text-green-600 mt-1">受注情報の登録と管理</p>
+                </a>
+                <a href="{% url 'sales:order_summary' %}" class="block p-4 bg-yellow-50 rounded-lg hover:bg-yellow-100">
+                    <h3 class="font-semibold text-yellow-700">売上集計</h3>
+                    <p class="text-sm text-yellow-600 mt-1">売上データの集計と分析</p>
+                </a>
+            </div>
+        </div>
+
+        {% elif user.department.name == '製品管理部' %}
+        <!-- 製品管理部用メニュー -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">製品・在庫管理</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <a href="{% url 'sales:product_list' %}" class="block p-4 bg-blue-50 rounded-lg hover:bg-blue-100">
+                    <h3 class="font-semibold text-blue-700">製品管理</h3>
+                    <p class="text-sm text-blue-600 mt-1">製品情報の管理と編集</p>
+                </a>
+                <div class="block p-4 bg-green-50 rounded-lg">
+                    <h3 class="font-semibold text-green-700">在庫状況</h3>
+                    <p class="text-sm text-green-600 mt-1">現在の製品在庫: {{ total_products }} 製品</p>
+                </div>
+            </div>
+        </div>
+
+        {% elif user.department.name == '人事部' %}
+        <!-- 人事部用メニュー -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">人事管理</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <a href="{% url 'accounts:employee_list' %}" class="block p-4 bg-blue-50 rounded-lg hover:bg-blue-100">
+                    <h3 class="font-semibold text-blue-700">従業員管理</h3>
+                    <p class="text-sm text-blue-600 mt-1">従業員情報の管理と編集</p>
+                </a>
+                <a href="{% url 'accounts:create_employee' %}" class="block p-4 bg-green-50 rounded-lg hover:bg-green-100">
+                    <h3 class="font-semibold text-green-700">従業員登録</h3>
+                    <p class="text-sm text-green-600 mt-1">新規従業員の登録</p>
+                </a>
+                <a href="{% url 'accounts:department_list' %}" class="block p-4 bg-yellow-50 rounded-lg hover:bg-yellow-100">
+                    <h3 class="font-semibold text-yellow-700">部署管理</h3>
+                    <p class="text-sm text-yellow-600 mt-1">部署情報の管理</p>
+                </a>
             </div>
         </div>
         {% endif %}
-
-        {% if user.account_type == 'root' or user.department == '製品管理部' %}
-        <div class="border-b pb-4">
-            <h3 class="text-lg font-semibold mb-3">製品管理</h3>
-            <div class="space-x-2">
-                <a href="{% url 'sales:product_list' %}" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">製品一覧</a>
-            </div>
-        </div>
-        {% endif %}
-
-        {% if user.account_type == 'root' or user.department == '人事部' %}
-        <div class="border-b pb-4">
-            <h3 class="text-lg font-semibold mb-3">従業員管理</h3>
-            <div class="space-x-2">
-                <a href="{% url 'accounts:employee_list' %}" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">従業員一覧</a>
-                <a href="{% url 'accounts:create_employee' %}" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">従業員登録</a>
-            </div>
-        </div>
-        {% endif %}
-
-        <!-- ログアウトボタン -->
-        <div class="pt-4">
-            <a href="{% url 'accounts:logout' %}" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">ログアウト</a>
-        </div>
     </div>
 
 {% else %}
-    <div class="space-x-4">
-        <a href="{% url 'accounts:signup' %}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">ルートアカウント登録</a>
-        <a href="{% url 'accounts:login' %}" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">ログイン</a>
+    <!-- 未ログインユーザー向けメニュー -->
+    <div class="text-center">
+        <div class="space-y-4">
+            <p class="text-gray-600 mb-4">システムをご利用になるには、ログインが必要です。</p>
+            <div class="space-x-4">
+                <a href="{% url 'accounts:signup' %}" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600">
+                    ルートアカウント登録
+                </a>
+                <a href="{% url 'accounts:login' %}" class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600">
+                    ログイン
+                </a>
+            </div>
+        </div>
     </div>
 {% endif %}
 {% endblock %}

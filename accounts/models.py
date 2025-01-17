@@ -73,9 +73,10 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name=_("is_superuser"),
         default=False
     )
-    department = models.CharField(
+    department = models.ForeignKey(
+        'Department',
         verbose_name=_("department"),
-        max_length=20,
+        on_delete=models.PROTECT,
         null=True,
         blank=True
     )
@@ -94,3 +95,31 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.account_id
+
+class Department(models.Model):
+    """部署モデル"""
+    code = models.CharField(
+        verbose_name=_("部署コード"),
+        max_length=10,
+        unique=True
+    )
+    name = models.CharField(
+        verbose_name=_("部署名"),
+        max_length=100
+    )
+    created_at = models.DateTimeField(
+        verbose_name=_("作成日時"),
+        auto_now_add=True
+    )
+    updated_at = models.DateTimeField(
+        verbose_name=_("更新日時"),
+        auto_now=True
+    )
+
+    class Meta:
+        verbose_name = _("部署")
+        verbose_name_plural = _("部署一覧")
+        ordering = ["code"]
+
+    def __str__(self):
+        return f"{self.code}: {self.name}"

@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import User
+from .models import User, Department
 import uuid
 
 class RootSignUpForm(UserCreationForm):
@@ -26,15 +26,11 @@ class RootSignUpForm(UserCreationForm):
         )
 
 class EmployeeAccountForm(UserCreationForm):
-    DEPARTMENT_CHOICES = [
-        ('営業部', '営業部'),
-        ('製造部', '製造部'),
-        ('製品管理部', '製品管理部'),
-        ('経理部', '経理部'),
-        ('人事部', '人事部'),
-    ]
-
-    department = forms.ChoiceField(choices=DEPARTMENT_CHOICES, label='Department')
+    department = forms.ModelChoiceField(
+        queryset=Department.objects.all(),
+        label='Department',
+        required=True
+    )
 
     def save(self, commit=True):
         user = super().save(commit=False)

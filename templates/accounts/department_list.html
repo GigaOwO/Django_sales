@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}
+<div class="h1">部署一覧</div>
+{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{% url 'accounts:department_create' %}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">新規部署登録</a>
+</div>
+
+<div class="overflow-x-auto">
+    <table class="min-w-full bg-white">
+        <thead class="bg-gray-100">
+            <tr>
+                <th class="px-6 py-3 border-b text-left">部署コード</th>
+                <th class="px-6 py-3 border-b text-left">部署名</th>
+                <th class="px-6 py-3 border-b text-left">更新日時</th>
+                <th class="px-6 py-3 border-b text-left">操作</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+            {% for department in departments %}
+            <tr>
+                <td class="px-6 py-4">{{ department.code }}</td>
+                <td class="px-6 py-4">{{ department.name }}</td>
+                <td class="px-6 py-4">{{ department.updated_at|date:"Y/m/d H:i" }}</td>
+                <td class="px-6 py-4">
+                    <a href="{% url 'accounts:department_edit' department.id %}" class="text-blue-600 hover:text-blue-900">編集</a>
+                    <a href="{% url 'accounts:department_delete' department.id %}" class="text-red-600 hover:text-red-900 ml-2">削除</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
