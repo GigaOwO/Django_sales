@@ -57,9 +57,12 @@
                         (ルートアカウント)
                         {% endif %}
                     </span>
-                    <a href="{% url 'accounts:logout' %}" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
-                        ログアウト
-                    </a>
+                    <form method="post" action="{% url 'accounts:logout' %}" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                            ログアウト
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>

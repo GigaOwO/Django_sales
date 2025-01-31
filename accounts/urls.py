@@ -8,7 +8,7 @@ urlpatterns = [
     path("", views.IndexView.as_view(), name="index"),
     path('signup/', views.RootSignupView.as_view(), name="signup"),
     path('login/', LoginView.as_view(template_name='accounts/login.html'), name='login'),
-    path('logout/', LogoutView.as_view(next_page='accounts:index'), name='logout'),
+    path('logout/', LogoutView.as_view(next_page='/'), name='logout'),
     
     # 従業員管理
     path('employees/', views.EmployeeListView.as_view(), name='employee_list'),

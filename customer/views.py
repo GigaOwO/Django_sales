@@ -7,27 +7,34 @@ from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.db.transaction import atomic
-from django.contrib.auth import login
-from django.contrib.auth.views import LoginView
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.views import LoginView, LogoutView
 from .models import CustomerUser, Cart, CartItem
 from .forms import CustomerUserCreationForm, CartItemForm, OrderConfirmationForm
 from sales.models import Product, Order
 from datetime import date, timedelta
+from django import forms
 
-class CustomerLoginView(LoginView):
+class CustomerLoginForm(forms.Form):
+    email = forms.EmailField(label='メールアドレス')
+    password = forms.CharField(label='パスワード', widget=forms.PasswordInput)
+
+class CustomerLoginView(FormView):
     template_name = 'customer/login.html'
-    
-    def get_success_url(self):
-        return reverse_lazy('customer:catalog')
-    
+    form_class = CustomerLoginForm
+    success_url = reverse_lazy('customer:catalog')
+
     def form_valid(self, form):
-        """Security check complete. Log the user in."""
-        user = form.get_user()
-        if hasattr(user, 'customer'):
+        email = form.cleaned_data.get('email')
+        password = form.cleaned_data.get('password')
+        user = authenticate(self.request, username=email, password=password)
+        
+        if user is not None and hasattr(user, 'customer'):
             login(self.request, user)
             return super().form_valid(form)
-        form.add_error(None, 'メールアドレスまたはパスワードが正しくありません。')
-        return self.form_invalid(form)
+        else:
+            form.add_error(None, 'メールアドレスまたはパスワードが正しくありません。')
+            return self.form_invalid(form)
 
 class CustomerRegistrationView(CreateView):
     """顧客ユーザー登録ビュー"""
@@ -182,3 +189,12 @@ class OrderHistoryView(LoginRequiredMixin, ListView):
         return Order.objects.filter(
             customer=self.request.user.customer
         ).order_by('-order_date')
+
+class CustomerLogoutView(LogoutView):
+    next_page = '/'  # ログアウト後のリダイレクト先
+    
+    def get_next_page(self):
+        """ログアウト後のリダイレクト先を動的に決定"""
+        if hasattr(self.request.user, 'customer'):
+            return '/store/catalog/'  # 顧客ユーザーの場合
+        return super().get_next_page()  # それ以外の場合

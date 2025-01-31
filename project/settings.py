@@ -43,6 +43,11 @@ INSTALLED_APPS = [
     'customer',
 ]
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'customer.auth.CustomerAuthBackend',
+]
+
 AUTH_USER_MODEL = "accounts.User"
 
 MIDDLEWARE = [
@@ -132,3 +137,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = 'accounts:login'
 LOGIN_REDIRECT_URL = 'accounts:index'
 LOGOUT_REDIRECT_URL = 'accounts:index'
+
+LOGOUT_REDIRECT_URL = '/'
+LOGIN_URL = 'accounts:login'
+LOGIN_REDIRECT_URL = 'accounts:index'

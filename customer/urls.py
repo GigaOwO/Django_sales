@@ -1,5 +1,4 @@
 from django.urls import path
-from django.contrib.auth.views import LogoutView
 from . import views
 
 app_name = 'customer'
@@ -8,7 +7,7 @@ urlpatterns = [
     # 認証関連
     path('register/', views.CustomerRegistrationView.as_view(), name='register'),
     path('login/', views.CustomerLoginView.as_view(), name='login'),
-    path('logout/', LogoutView.as_view(next_page='customer:login'), name='logout'),
+    path('logout/', views.CustomerLogoutView.as_view(), name='logout'),
     
     # 製品カタログ
     path('catalog/', views.ProductCatalogView.as_view(), name='catalog'),
