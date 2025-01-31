@@ -94,13 +94,26 @@ class ProductListView(LoginRequiredMixin, ListView):
     model = Product
     template_name = 'sales/product_list.html'
     context_object_name = 'products'
+    ordering = ['product_code']
 
-    def get_queryset(self):
-        """製品管理部のみ全データを編集可能、他部署は参照のみ"""
-        queryset = super().get_queryset()
-        return queryset
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        # ルートユーザーまたは製品管理部のユーザーは編集可能
+        context['can_edit'] = user.account_type == 'root' or (
+            user.department and user.department.name == '製品管理部'
+        )
+        return context
 
-class ProductCreateView(LoginRequiredMixin, CreateView):
+class ProductAccessMixin(UserPassesTestMixin):
+    """製品管理部のみアクセス可能にするMixin"""
+    def test_func(self):
+        user = self.request.user
+        return user.account_type == 'root' or (
+            user.department and user.department.name == '製品管理部'
+        )
+
+class ProductCreateView(LoginRequiredMixin, ProductAccessMixin, CreateView):
     """製品登録"""
     model = Product
     template_name = 'sales/product_form.html'
@@ -112,10 +125,14 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
         context['action'] = '登録'
         return context
 
-    def test_func(self):
-        return self.request.user.department == '製品管理部'
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, f'製品「{form.instance.product_name}」を登録しました。')
+        # 在庫情報の初期化
+        self.object.create_inventory()
+        return response
 
-class ProductUpdateView(LoginRequiredMixin, UpdateView):
+class ProductUpdateView(LoginRequiredMixin, ProductAccessMixin, UpdateView):
     """製品編集"""
     model = Product
     template_name = 'sales/product_form.html'
@@ -127,17 +144,21 @@ class ProductUpdateView(LoginRequiredMixin, UpdateView):
         context['action'] = '編集'
         return context
 
-    def test_func(self):
-        return self.request.user.department == '製品管理部'
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, f'製品「{form.instance.product_name}」を更新しました。')
+        return response
 
-class ProductDeleteView(LoginRequiredMixin, DeleteView):
+class ProductDeleteView(LoginRequiredMixin, ProductAccessMixin, DeleteView):
     """製品削除"""
     model = Product
     template_name = 'sales/product_confirm_delete.html'
     success_url = reverse_lazy('sales:product_list')
 
-    def test_func(self):
-        return self.request.user.department == '製品管理部'
+    def delete(self, request, *args, **kwargs):
+        product = self.get_object()
+        messages.success(request, f'製品「{product.product_name}」を削除しました。')
+        return super().delete(request, *args, **kwargs)
 
 
 class OrderAccessMixin(UserPassesTestMixin):
