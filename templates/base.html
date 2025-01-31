@@ -21,7 +21,7 @@
 
                     <!-- ナビゲーションリンク -->
                     <div class="hidden md:ml-6 md:flex md:space-x-8">
-                        {% if user.account_type == 'root' or user.department == '営業部' %}
+                        {% if user.account_type == 'root' or user.department.name == '営業部' %}
                         <a href="{% url 'sales:customer_list' %}" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
                             得意先管理
                         </a>
@@ -33,13 +33,13 @@
                         </a>
                         {% endif %}
 
-                        {% if user.account_type == 'root' or user.department == '製品管理部' %}
+                        {% if user.account_type == 'root' or user.department.name == '製品管理部' %}
                         <a href="{% url 'sales:product_list' %}" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
                             製品管理
                         </a>
                         {% endif %}
 
-                        {% if user.account_type == 'root' or user.department == '人事部' %}
+                        {% if user.account_type == 'root' or user.department.name == '人事部' %}
                         <a href="{% url 'accounts:employee_list' %}" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
                             従業員管理
                         </a>
@@ -57,12 +57,9 @@
                         (ルートアカウント)
                         {% endif %}
                     </span>
-                    <form method="post" action="{% url 'accounts:logout' %}" class="inline">
-                        {% csrf_token %}
-                        <button type="submit" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
-                            ログアウト
-                        </button>
-                    </form>
+                    <a href="{% url 'accounts:logout' %}" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                        ログアウト
+                    </a>
                 </div>
             </div>
         </div>

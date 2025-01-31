@@ -128,6 +128,6 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-LOGIN_URL = 'accounts:login'  # ログインページのURL
-LOGIN_REDIRECT_URL = 'accounts:index'  # ログイン後のリダイレクト先
-LOGOUT_REDIRECT_URL = 'accounts:index'  # ログアウト後のリダイレクト先
+LOGIN_URL = 'accounts:login'
+LOGIN_REDIRECT_URL = 'accounts:index'
+LOGOUT_REDIRECT_URL = 'accounts:index'
