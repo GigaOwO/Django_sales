@@ -1,0 +1,48 @@
+{% extends "customer/base.html" %}
+
+{% block title %}製品カタログ - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <h1 class="text-2xl font-bold">製品カタログ</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for product in products %}
+        <div class="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow duration-300">
+            <div class="p-6">
+                <!-- 製品情報 -->
+                <h2 class="text-xl font-semibold text-gray-900 mb-2">{{ product.product_name }}</h2>
+                <p class="text-gray-600 mb-4">製品コード: {{ product.product_code }}</p>
+                
+                <!-- 価格と在庫情報 -->
+                <div class="flex justify-between items-center mb-4">
+                    <div class="text-2xl font-bold text-gray-900">
+                        ¥{{ product.unit_price|stringformat:",.0f" }}
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        在庫: {{ product.inventory.quantity }}
+                    </div>
+                </div>
+
+                <!-- カートに追加ボタン -->
+                {% if user.is_authenticated %}
+                <a href="{% url 'customer:add_to_cart' product.pk %}" 
+                   class="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-center block">
+                    カートに追加
+                </a>
+                {% else %}
+                <a href="{% url 'customer:login' %}" 
+                   class="w-full bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 text-center block">
+                    ログインして注文
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full text-center py-8 text-gray-500">
+            現在、購入可能な製品はありません。
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

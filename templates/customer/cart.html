@@ -1,0 +1,105 @@
+{% extends "customer/base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}ショッピングカート - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <h1 class="text-2xl font-bold">ショッピングカート</h1>
+
+    {% if cart_items %}
+    <div class="space-y-4">
+        <!-- カート内商品一覧 -->
+        <div class="border rounded-lg overflow-hidden">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            製品名
+                        </th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            単価
+                        </th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            数量
+                        </th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            小計
+                        </th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            操作
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for item in cart_items %}
+                    <tr>
+                        <td class="px-6 py-4">
+                            <div class="text-sm font-medium text-gray-900">
+                                {{ item.product.product_name }}
+                            </div>
+                            <div class="text-sm text-gray-500">
+                                {{ item.product.product_code }}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-right text-sm text-gray-500">
+                            ¥{{ item.product.unit_price|stringformat:",.0f" }}
+                        </td>
+                        <td class="px-6 py-4">
+                            <form method="post" action="{% url 'customer:update_cart_item' item.pk %}" class="flex justify-end items-center">
+                                {% csrf_token %}
+                                <input type="number" name="quantity" value="{{ item.quantity }}" 
+                                       min="1" max="{{ item.product.inventory.quantity }}"
+                                       class="w-20 rounded border-gray-300 text-right" />
+                                <button type="submit" class="ml-2 text-blue-600 hover:text-blue-900">
+                                    更新
+                                </button>
+                            </form>
+                        </td>
+                        <td class="px-6 py-4 text-right text-sm text-gray-900">
+                            ¥{{ item.subtotal|stringformat:",.0f" }}
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <form method="post" action="{% url 'customer:remove_from_cart' item.pk %}">
+                                {% csrf_token %}
+                                <button type="submit" class="text-red-600 hover:text-red-900">
+                                    削除
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot class="bg-gray-50">
+                    <tr>
+                        <td colspan="3" class="px-6 py-4 text-right text-sm font-medium text-gray-900">
+                            合計
+                        </td>
+                        <td class="px-6 py-4 text-right text-lg font-bold text-gray-900">
+                            ¥{{ total|stringformat:",.0f" }}
+                        </td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <!-- 注文ボタン -->
+        <div class="flex justify-end mt-4">
+            <a href="{% url 'customer:order_confirm' %}" 
+               class="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600">
+                注文手続きへ進む
+            </a>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-12">
+        <p class="text-gray-500 mb-4">カートに商品がありません</p>
+        <a href="{% url 'customer:catalog' %}" 
+           class="inline-block bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600">
+            製品カタログへ戻る
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

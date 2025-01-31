@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>{% block title %}ガッカリ工業 オンラインストア{% endblock %}</title>
+</head>
+<body class="bg-gray-50">
+    <!-- ナビゲーションバー -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <a href="{% url 'customer:catalog' %}" class="text-xl font-bold text-gray-800">
+                            ガッカリ工業
+                        </a>
+                    </div>
+
+                    <div class="hidden md:ml-6 md:flex md:space-x-8">
+                        <a href="{% url 'customer:catalog' %}" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                            製品カタログ
+                        </a>
+                        {% if user.is_authenticated %}
+                        <a href="{% url 'customer:cart' %}" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                            カート
+                        </a>
+                        <a href="{% url 'customer:order_history' %}" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                            注文履歴
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="flex items-center">
+                    {% if user.is_authenticated %}
+                        <span class="text-gray-700 text-sm mr-4">{{ user.customer.customer_name }}様</span>
+                        <a href="{% url 'customer:logout' %}" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                            ログアウト
+                        </a>
+                    {% else %}
+                        <a href="{% url 'customer:login' %}" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                            ログイン
+                        </a>
+                        <a href="{% url 'customer:register' %}" class="ml-4 bg-blue-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-600">
+                            新規登録
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- メインコンテンツ -->
+    <div class="container mx-auto px-4 py-8">
+        {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+            <div class="rounded-md {% if message.tags == 'success' %}bg-green-50{% elif message.tags == 'error' %}bg-red-50{% else %}bg-blue-50{% endif %} p-4 mb-2">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        {% if message.tags == 'success' %}
+                        <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        {% elif message.tags == 'error' %}
+                        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                        </svg>
+                        {% endif %}
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium {% if message.tags == 'success' %}text-green-800{% elif message.tags == 'error' %}text-red-800{% else %}text-blue-800{% endif %}">
+                            {{ message }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <div class="max-w-7xl mx-auto bg-white rounded-lg shadow-md p-6">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+</body>
+</html>

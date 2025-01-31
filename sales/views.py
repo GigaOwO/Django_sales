@@ -13,15 +13,18 @@ class CustomerListView(LoginRequiredMixin, ListView):
     model = Customer
     template_name = 'sales/customer_list.html'
     context_object_name = 'customers'
+    ordering = ['customer_code']  # コード順にソート
 
-    def get_queryset(self):
-        """営業部のみ全データ表示、他部署は参照のみ"""
-        queryset = super().get_queryset()
-        if self.request.user.department != '営業部':
-            queryset = queryset.none()
-        return queryset
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        # ルートユーザーまたは営業部のユーザーは編集可能
+        context['can_edit'] = user.account_type == 'root' or (
+            user.department and user.department.name == '営業部'
+        )
+        return context
 
-class CustomerCreateView(LoginRequiredMixin, CreateView):
+class CustomerCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     """得意先登録"""
     model = Customer
     template_name = 'sales/customer_form.html'
@@ -29,12 +32,25 @@ class CustomerCreateView(LoginRequiredMixin, CreateView):
               'postal_code', 'address', 'email']
     success_url = reverse_lazy('sales:customer_list')
 
+    def test_func(self):
+        # ルートユーザーまたは営業部のユーザーのみ作成可能
+        user = self.request.user
+        return user.account_type == 'root' or (
+            user.department and user.department.name == '営業部'
+        )
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['action'] = '登録'
         return context
 
-class CustomerUpdateView(LoginRequiredMixin, UpdateView):
+    def form_valid(self, form):
+        """フォームが有効な場合の処理"""
+        response = super().form_valid(form)
+        messages.success(self.request, f'得意先「{form.instance.customer_name}」を登録しました。')
+        return response
+
+class CustomerUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     """得意先編集"""
     model = Customer
     template_name = 'sales/customer_form.html'
@@ -42,23 +58,36 @@ class CustomerUpdateView(LoginRequiredMixin, UpdateView):
               'postal_code', 'address', 'email']
     success_url = reverse_lazy('sales:customer_list')
 
+    def test_func(self):
+        # ルートユーザーまたは営業部のユーザーのみ編集可能
+        user = self.request.user
+        return user.account_type == 'root' or (
+            user.department and user.department.name == '営業部'
+        )
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['action'] = '編集'
         return context
 
-    def test_func(self):
-        return self.request.user.department == '営業部'
-
-class CustomerDeleteView(LoginRequiredMixin, DeleteView):
+class CustomerDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     """得意先削除"""
     model = Customer
     template_name = 'sales/customer_confirm_delete.html'
     success_url = reverse_lazy('sales:customer_list')
 
     def test_func(self):
-        return self.request.user.department == '営業部'
+        # ルートユーザーまたは営業部のユーザーのみ削除可能
+        user = self.request.user
+        return user.account_type == 'root' or (
+            user.department and user.department.name == '営業部'
+        )
 
+    def delete(self, request, *args, **kwargs):
+        """削除成功時にメッセージを表示"""
+        result = super().delete(request, *args, **kwargs)
+        messages.success(request, '得意先を削除しました。')
+        return result
 
 class ProductListView(LoginRequiredMixin, ListView):
     """製品一覧"""

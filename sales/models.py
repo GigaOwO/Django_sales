@@ -18,6 +18,7 @@ class Customer(models.Model):
     class Meta:
         verbose_name = "得意先"
         verbose_name_plural = "得意先一覧"
+        ordering = ['customer_code']  # 得意先コード順にソート
 
     def __str__(self):
         return f"{self.customer_code}: {self.customer_name}"

@@ -132,16 +132,51 @@
 
 {% else %}
     <!-- 未ログインユーザー向けメニュー -->
-    <div class="text-center">
-        <div class="space-y-4">
-            <p class="text-gray-600 mb-4">システムをご利用になるには、ログインが必要です。</p>
-            <div class="space-x-4">
-                <a href="{% url 'accounts:signup' %}" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600">
-                    ルートアカウント登録
-                </a>
-                <a href="{% url 'accounts:login' %}" class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600">
-                    ログイン
-                </a>
+    <div class="max-w-3xl mx-auto">
+        <!-- メインセクション -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">ガッカリ工業へようこそ</h1>
+            <p class="text-lg text-gray-600 mb-8">特殊金属加工のエキスパートとして、高品質な製品をお届けします。</p>
+        </div>
+
+        <!-- アクセス方法の選択 -->
+        <div class="grid md:grid-cols-2 gap-8">
+            <!-- 社内システムアクセス -->
+            <div class="bg-white rounded-lg shadow-lg p-8">
+                <h2 class="text-xl font-bold text-gray-900 mb-4">社内システム</h2>
+                <p class="text-gray-600 mb-6">社員の方はこちらからアクセスしてください。</p>
+                <div class="space-y-4">
+                    <a href="{% url 'accounts:login' %}" 
+                       class="block w-full bg-blue-500 text-white text-center px-6 py-3 rounded-lg hover:bg-blue-600">
+                        社内システムログイン
+                    </a>
+                    {% if not root_exists %}
+                    <a href="{% url 'accounts:signup' %}" 
+                       class="block w-full bg-gray-500 text-white text-center px-6 py-3 rounded-lg hover:bg-gray-600">
+                        管理者アカウント登録
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- オンラインストアアクセス -->
+            <div class="bg-white rounded-lg shadow-lg p-8">
+                <h2 class="text-xl font-bold text-gray-900 mb-4">オンラインストア</h2>
+                <p class="text-gray-600 mb-6">お客様はこちらからご注文いただけます。</p>
+                <div class="space-y-4">
+                    <a href="{% url 'customer:catalog' %}" 
+                       class="block w-full bg-green-500 text-white text-center px-6 py-3 rounded-lg hover:bg-green-600">
+                        製品カタログを見る
+                    </a>
+                    <a href="{% url 'customer:register' %}" 
+                       class="block w-full bg-yellow-500 text-white text-center px-6 py-3 rounded-lg hover:bg-yellow-600">
+                        新規お客様登録
+                    </a>
+                    <a href="{% url 'customer:login' %}" 
+                       class="block w-full bg-gray-500 text-white text-center px-6 py-3 rounded-lg hover:bg-gray-600">
+                        お客様ログイン
+                    </a>
+                </div>
             </div>
         </div>
     </div>

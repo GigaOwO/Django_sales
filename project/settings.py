@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'accounts',
     'widget_tweaks',
     'sales',
+    'customer',
 ]
 
 AUTH_USER_MODEL = "accounts.User"

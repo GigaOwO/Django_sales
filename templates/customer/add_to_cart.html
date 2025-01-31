@@ -1,0 +1,105 @@
+{% extends "customer/base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}商品をカートに追加 - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <h1 class="text-2xl font-bold mb-8">商品をカートに追加</h1>
+
+    <div class="bg-white shadow rounded-lg p-6">
+        <!-- 製品情報 -->
+        <div class="mb-8">
+            <h2 class="text-xl font-medium text-gray-900 mb-4">製品情報</h2>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <p class="text-sm text-gray-500">製品名</p>
+                    <p class="font-medium">{{ product.product_name }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">製品コード</p>
+                    <p class="font-medium">{{ product.product_code }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">単価</p>
+                    <p class="font-medium">¥{{ product.unit_price|stringformat:",.0f" }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">在庫数</p>
+                    <p class="font-medium">{{ product.inventory.quantity }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 数量入力フォーム -->
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="rounded-md bg-red-50 p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-red-800">{{ form.non_field_errors }}</h3>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div>
+                <label for="{{ form.quantity.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                    数量を入力してください
+                </label>
+                <div class="mt-1">
+                    {{ form.quantity|add_class:"block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" }}
+                </div>
+                {% if form.quantity.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.quantity.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- 小計表示（JavaScriptで動的に更新） -->
+            <div class="bg-gray-50 p-4 rounded-lg">
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-700">小計:</span>
+                    <span class="text-lg font-medium" id="subtotal">
+                        ¥0
+                    </span>
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-4">
+                <a href="{% url 'customer:catalog' %}" 
+                   class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600">
+                    戻る
+                </a>
+                <button type="submit" class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600">
+                    カートに追加
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // 小計の動的更新
+    document.addEventListener('DOMContentLoaded', function() {
+        const quantityInput = document.getElementById('{{ form.quantity.id_for_label }}');
+        const subtotalDisplay = document.getElementById('subtotal');
+        const unitPrice = {{ product.unit_price }};
+
+        function updateSubtotal() {
+            const quantity = parseInt(quantityInput.value) || 0;
+            const subtotal = quantity * unitPrice;
+            subtotalDisplay.textContent = '¥' + subtotal.toLocaleString();
+        }
+
+        quantityInput.addEventListener('input', updateSubtotal);
+        updateSubtotal();  // 初期表示
+    });
+</script>
+{% endblock %}
